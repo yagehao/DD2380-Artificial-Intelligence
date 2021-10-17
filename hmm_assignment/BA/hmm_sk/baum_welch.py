@@ -1,140 +1,6 @@
-#!/usr/bin/env python3
-
-from player_controller_hmm import PlayerControllerHMMAbstract
-from constants import *
-import random
-#from baum_welch import Model
-#from FORWARD import Forward
+import sys
+import math
 import copy
-import math 
-
-class PlayerControllerHMM(PlayerControllerHMMAbstract):
-    def init_parameters(self):
-        init_A = [[1]]
-        init_B = [[1/8]*8]
-        init_Pi = [1]
-        self.emi_seq = None
-        self.last_guess = [0]
-        # self.current_model = (self.A, self.B, self.Pi)
-        self.all_models = [[init_A, init_B, init_Pi]]*7
-        self.indexes = 0
-        self.revealed_fish = [None]*70
-        self.data = [[] for x in range(70)]
-        """
-        In this function you should initialize the parameters you will need,
-        such as the initialization of models, or fishes, among others.
-        """
-        pass
-
-    """
-    def get_json(self):
-        filename = 'sequences.json'
-        with open(filename, 'r') as f:
-            data = json.load(f)
-
-        return data
-    """
-
-    def predict(self, emission_seq):
-        probabilities = []
-
-        for model in self.all_models:
-            prob = Forward(model, emission_seq).compute_prob()
-            
-            """
-            print("_______________________")
-            print("BEGINNNNNNNNNNNNNNNNN")
-            print(model)
-            print(prob)
-            print("_______________________")
-            """
-            
-            
-            probabilities.append([prob])
-
-
-        idx = probabilities.index(max(probabilities))
-
-
-        return idx
-
-    def guess(self, step, observations):
-        # B = [[1/8]*8]
-        # data = self.get_json()
-        # self.A.pop()
-        # print("HEREEEEE")
-        # print(self.A)
-        # model = Model([[1]], B, [1], data["sequences"][0])
-    #     """
-    #     This method gets called on every iteration, providing observations.
-    #     Here the player should process and store this information,
-    #     and optionally make a guess by returning a tuple containing the fish index and the guess.
-    #     :param step: iteration number
-    #     :param observations: a list of N_FISH observations, encoded as integers
-    #     :return: None or a tuple (fish_id, fish_type)
-    #     """        
-
-        
-        #print(step)
-
-        if step <= 110:
-            for i in range(len(observations)):
-                self.data[i].append(observations[i])
-            return None 
-
-        elif (step==111):
-            #print("REACHING")
-            return (0, 0)
-
-        else:
-            fish_index = step-111
-            type = self.predict(self.data[fish_index])
-            #self.last_guess = [type]
-            return (step-111, type)
-    #
-    #     # This code would make a random guess on each step:
-    #     return None
-
-    def reveal(self, correct, fish_id, true_type):
-
-        #print("111111111111", correct, fish_id, true_type)
-        #print(self.all_models)
-        current_model = copy.deepcopy(self.all_models[true_type]) 
-
-        if not correct:
-            #self.revealed_fish[fish_id] = true_type
-            emi_seq = self.data[fish_id]
-
-            A = current_model[0]
-            B = current_model[1]
-            Pi = current_model[2]
-
-
-            learnt_model = Model(A, B, Pi, emi_seq)
-            newA, newB, newPi = learnt_model.iteration()
-
-            current_model[0] = newA 
-            current_model[1] = newB 
-            current_model[2] = newPi 
-        
-            #self.all_models[true_type] = newA, newB, newPi
-
-        self.all_models[true_type] = current_model
-        #print(self.all_models)
-        #print("____________________________")
-
-        """
-        This methods gets called whenever a guess was made.
-        It informs the player about the guess result
-        and reveals the correct type of that fish.
-        :param correct: tells if the guess was correct
-        :param fish_id: fish's index
-        :param true_type: the correct type of the fish
-        :return:
-        """
-        pass
-
-
 
 class Model:
     def __init__(self, A, B, Pi, emi_seq):
@@ -341,42 +207,17 @@ class Model:
 
 
 
-class Forward:
-        def __init__(self, model, emission_sequence):
 
-            self.transition_matrix = model[0]
-            self.initial_matrix = model[2]
-            self.emission_matrix = model[1]
-            self.emission_sequence = emission_sequence
 
-        def compute_alpha0(self):
-            obs_0 = self.emission_sequence[0]
-            alpha0 = [0.0] * len(self.initial_matrix)
-            for i in range(len(alpha0)):
-                alpha0[i] = self.initial_matrix[i] * self.emission_matrix[i][obs_0]
 
-            return alpha0
 
-        def compute_intermediate_sum(self, i, alpha):
-            sum = 0
-            for j in range(len(alpha)):
-                sum += alpha[j] * self.transition_matrix[j][i]
-            return sum
 
-        def compute_alphas(self, prev_alpha):
-            new_alpha = [0.0] * len(prev_alpha)
-            num_obs = len(self.emission_sequence)
-            for t in range(1, num_obs):
-                for i in range(len(prev_alpha)):
-                    intermediate_sum = self.compute_intermediate_sum(i, prev_alpha)
-                    new_alpha[i] = intermediate_sum * self.emission_matrix[i][self.emission_sequence[t]]
-                prev_alpha = new_alpha
-                new_alpha = [0.0] * len(prev_alpha)
-            return sum(prev_alpha)
 
-        def compute_prob(self):
-            alpha0 = self.compute_alpha0()
-            prob = self.compute_alphas(alpha0)
-            #print(prob)
 
-            return prob
+
+
+
+
+
+
+

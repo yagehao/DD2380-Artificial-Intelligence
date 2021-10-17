@@ -38,6 +38,7 @@ class PlayerControllerHMMAbstract(PlayerController):
                     observations[self.__name2id[key]] = msg[key]
 
             guess_result = self.guess(count, observations)
+            #print(observations)
             if guess_result is None:
                 msg = {'guessing': False}
                 self.sender(msg)
